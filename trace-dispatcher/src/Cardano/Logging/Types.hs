@@ -43,7 +43,6 @@ module Cardano.Logging.Types (
   , PreFormatted(..)
 ) where
 
--- import           Control.Tracer
 import           Codec.Serialise (Serialise (..))
 import qualified Control.Tracer as T
 import           Data.Aeson ((.=))

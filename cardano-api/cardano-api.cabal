@@ -117,7 +117,6 @@ library
                       , cardano-protocol-tpraos
                       , cardano-slotting
                       , cborg
-                      , vector-map
                       , contra-tracer
                       , containers
                       , cryptonite
@@ -138,7 +137,9 @@ library
                       , ouroboros-network
                       , ouroboros-network-framework
                       , parsec
+                      , plutus-core
                       , plutus-ledger-api
+                      , plutus-tx
                       , prettyprinter
                       , prettyprinter-configurable
                       , scientific
@@ -146,6 +147,7 @@ library
                       , small-steps
                       , cardano-ledger-shelley
                       , small-steps
+                      , some
                       , stm
                       , strict-containers
                       , text
@@ -154,7 +156,9 @@ library
                       , transformers-except
                       , typed-protocols
                       , unordered-containers >= 0.2.11
+                      , utf8-string
                       , vector
+                      , vector-map
                       , yaml
 
 library gen
