@@ -451,15 +451,23 @@ runChainCommand s@State{sMachPerf=Just perf}
 runChainCommand _ c@DumpMachPerf = missingCommandData c
   ["machine performance stats"]
 
--- runChainCommand s@State{sRun=Just run, sSlots=Just slots, sMachPerf=Just perf}
---   c@Cardano.Command.ClusterPerf = do
---   perf <- mapConcurrentlyPure (slotStatsMachPerf run) slots
---           & fmap sequence
---           & newExceptT
---           & firstExceptT (CommandError c)
---   pure s { sClusterPerf = Just perf }
--- runChainCommand _ c@Cardano.Command.ClusterPerf{} = missingCommandData c
---   ["run metadata & genesis", "filtered slots", "machine performance stats"]
+runChainCommand s@State{sRun=Just run, sSlots=Just slots, sMachPerf=Just _machPerfs}
+  c@Cardano.Command.ClusterPerf = do
+  _perf <- mapConcurrentlyPure (slotStatsMachPerf run) slots
+          & fmap sequence
+          & newExceptT
+          & firstExceptT (CommandError c)
+  pure s { sClusterPerf = Nothing }
+runChainCommand _ c@Cardano.Command.ClusterPerf{} = missingCommandData c
+  ["run metadata & genesis", "filtered slots", "machine performance stats"]
+
+runChainCommand s@State{sMachPerf=Just perf}
+  c@(DumpClusterPerf _f) = do
+  dumpAssociatedObjects "perf-stats" perf
+    & firstExceptT (CommandError c)
+  pure s
+runChainCommand _ c@DumpClusterPerf{} = missingCommandData c
+  ["cluster performance stats"]
 
 runChainCommand s@State{sRun=Just run, sBlockProp=Just prop}
   c@(ReportPropForger f) = do

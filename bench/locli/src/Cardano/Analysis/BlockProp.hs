@@ -233,32 +233,6 @@ beForgedAt :: BlockEvents -> UTCTime
 beForgedAt BlockEvents{beForge=BlockForge{..}} =
   bfForged `afterSlot` bfSlotStart
 
-mapChainToBlockEventCDF ::
-  (Real a, ToRealFrac a Double)
-  => [PercSpec Double]
-  -> [BlockEvents]
-  -> (BlockEvents -> Maybe a)
-  -> Distribution Double a
-mapChainToBlockEventCDF percs cbes proj =
-  computeDistribution percs $ mapMaybe proj cbes
-
-mapChainToPeerBlockObservationCDF ::
-     [PercSpec Double]
-  -> [BlockEvents]
-  -> (BlockObservation -> Maybe NominalDiffTime)
-  -> String
-  -> Distribution Double NominalDiffTime
-mapChainToPeerBlockObservationCDF percs cbes proj desc =
-  computeDistribution percs allObservations
- where
-   allObservations :: [NominalDiffTime]
-   allObservations =
-     concat $ cbes <&> blockObservations
-
-   blockObservations :: BlockEvents -> [NominalDiffTime]
-   blockObservations be =
-     proj `mapMaybe` filter isValidBlockObservation (beObservations be)
-
 buildMachViews :: Run -> [(JsonLogfile, [LogObject])] -> IO [(JsonLogfile, MachView)]
 buildMachViews run = mapConcurrentlyPure (fst &&& blockEventMapsFromLogObjects run)
 
@@ -459,8 +433,40 @@ blockProp run@Run{genesis} chain domSlot domBlock = do
     }
  where
    forgerEventsCDF   :: (Real a, ToRealFrac a Double) => (BlockEvents -> Maybe a) -> Distribution Double a
-   forgerEventsCDF   = mapChainToBlockEventCDF           stdPercSpecs chain
+   forgerEventsCDF   = flip (witherToDistrib (computeDistribution stdPercSpecs)) chain
    observerEventsCDF = mapChainToPeerBlockObservationCDF stdPercSpecs chain
+
+   mapChainToBlockEventCDF ::
+     (Real a, ToRealFrac a Double)
+     => [PercSpec Double]
+     -> [BlockEvents]
+     -> (BlockEvents -> Maybe a)
+     -> Distribution Double a
+   mapChainToBlockEventCDF percs cbes proj =
+     computeDistribution percs $
+       mapMaybe proj cbes
+
+   mapChainToPeerBlockObservationCDF ::
+        [PercSpec Double]
+     -> [BlockEvents]
+     -> (BlockObservation -> Maybe NominalDiffTime)
+     -> String
+     -> Distribution Double NominalDiffTime
+   mapChainToPeerBlockObservationCDF percs cbes proj desc =
+     computeDistribution percs $
+       concat $ cbes <&> blockObservations
+    where
+      blockObservations :: BlockEvents -> [NominalDiffTime]
+      blockObservations be =
+        proj `mapMaybe` filter isValidBlockObservation (beObservations be)
+
+witherToDistrib ::
+     ([b] -> Distribution Double b)
+  -> (a -> Maybe b)
+  -> [a]
+  -> Distribution Double b
+witherToDistrib distrify proj xs =
+  distrify $ mapMaybe proj xs
 
 -- | Given a single machine's log object stream, recover its block map.
 blockEventMapsFromLogObjects :: Run -> (JsonLogfile, [LogObject]) -> MachView
