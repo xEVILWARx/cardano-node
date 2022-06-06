@@ -2,6 +2,7 @@
 , lib, jq, runCommand
 , db-analyser
 , cardanoNodePackages
+, cardano-world
 }:
 
 with lib;
@@ -35,7 +36,7 @@ let
 
   workbench = with cardanoNodePackages; with pkgs; workbench' (
     [ git graphviz
-      jq
+      jq yq
       moreutils
       procps
 
@@ -96,7 +97,7 @@ let
     };
 
   ## materialise-profile :: ProfileNix -> BackendProfile -> Profile
-  materialise-profile      = import ./profile.nix  { inherit pkgs lib; };
+  materialise-profile      = import ./profile.nix  { inherit pkgs lib cardano-world; };
   ## profile-topology :: ProfileNix -> Topology
   profile-topology         = import ./topology.nix { inherit pkgs; };
   ## profile-topology :: ProfileNix -> Topology -> Genesis

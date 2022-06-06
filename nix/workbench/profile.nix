@@ -1,4 +1,4 @@
-{ pkgs, lib }:
+{ pkgs, lib, cardano-world }:
 with lib;
 
 { profileNix
@@ -6,7 +6,7 @@ with lib;
 , workbench
 }:
 pkgs.runCommand "workbench-profile-output-${profileNix.name}"
-  { buildInputs = with pkgs; [ jq workbench ];
+  { buildInputs = with pkgs; [ jq yq workbench ];
     nodeServices =
       __toJSON
       (flip mapAttrs profileNix.node-services
@@ -35,6 +35,8 @@ pkgs.runCommand "workbench-profile-output-${profileNix.name}"
         config               = config.JSON;
         start                = startupScript;
       };
+    cardanoNodeImageName = cardano-world.x86_64-linux.cardano.oci-images.cardano-node.imageName;
+    cardanoNodeImageTag = cardano-world.x86_64-linux.cardano.oci-images.cardano-node.imageTag;
     passAsFile = [ "nodeServices" "generatorService" "tracerService" ];
   }
   ''
@@ -46,6 +48,10 @@ pkgs.runCommand "workbench-profile-output-${profileNix.name}"
   cp    $tracerServicePath         $out/tracer-service.json
 
   wb profile node-specs $out/profile.json > $out/node-specs.json
+
+  echo  $cardanoNodeImageName    > $out/cardanoNodeImageName
+  echo  $cardanoNodeImageTag     > $out/cardanoNodeImageTag
+  wb app compose $out/profile.json $out/node-specs.json $cardanoNodeImageName $cardanoNodeImageTag > $out/docker-compose.yaml
   ''
 // { inherit (profileNix) name;
      inherit workbench;
