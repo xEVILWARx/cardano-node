@@ -59,6 +59,8 @@
     };
 
     cardano-mainnet-mirror.url = "github:input-output-hk/cardano-mainnet-mirror/nix";
+
+    cardano-world.url = "github:input-output-hk/cardano-world";
   };
 
   outputs =
@@ -74,6 +76,7 @@
     , node-measured
     , node-process
     , cardano-node-workbench
+    , cardano-world
     , ...
     }@input:
     let
