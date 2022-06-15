@@ -307,6 +307,12 @@ jobs:
     - name: Build
       run: cabal build cardano-node cardano-cli cardano-node-chairman cardano-submit-api
 
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
+      if: matrix.os == 'windows-latest'
+      with:
+        limit-access-to-actor: true
+
     - name: Run tests
       run: |
         if [ "${{github.event.inputs.tests}}" == "all" ]; then
