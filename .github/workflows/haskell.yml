@@ -26,7 +26,7 @@ jobs:
       fail-fast: false
       matrix:
         ghc: ["8.10.7"]
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [windows-latest]
 
     env:
       # current ref from: 27.02.2022
@@ -307,22 +307,16 @@ jobs:
     - name: Build
       run: cabal build cardano-node cardano-cli cardano-node-chairman cardano-submit-api
 
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
-      if: matrix.os == 'windows-latest'
-      with:
-        limit-access-to-actor: true
-
     - name: Run tests
       run: |
         if [ "${{github.event.inputs.tests}}" == "all" ]; then
-          TMPDIR="${{ runner.temp }}" TMP="${{ runner.temp }}" KEEP_WORKSPACE=1 cabal test all
+          TMPDIR="${{ runner.temp }}" TMP="${{ runner.temp }}" KEEP_WORKSPACE=1 cabal test all --test-show-details=direct
         fi
 
     - name: "Run tests"
       run: |
         if [ "${{github.event.inputs.tests}}" != "all" ]; then
-          TMPDIR="${{ runner.temp }}" TMP="${{ runner.temp }}" KEEP_WORKSPACE=1 cabal test \
+          TMPDIR="${{ runner.temp }}" TMP="${{ runner.temp }}" KEEP_WORKSPACE=1 cabal test --test-show-details=direct \
             cardano-testnet \
             cardano-api \
             cardano-node \
@@ -353,6 +347,14 @@ jobs:
       with:
         name: artifacts-${{ matrix.os }}
         path: ./artifacts
+
+    - name: Delete socket files in preparation for upload artifacts
+      if: ${{ always() }}
+      run: |
+        echo "Cat cardano-cli-test"
+        cat  D:\a\cardano-node\cardano-node\dist-newstyle\build\x86_64-windows\ghc-8.10.7\cardano-cli-1.33.0\t\cardano-cli-test\test\cardano-cli-1.33.0-cardano-cli-test.log
+        echo "And now cardano-cli-golden"
+        cat D:\a\cardano-node\cardano-node\dist-newstyle\build\x86_64-windows\ghc-8.10.7\cardano-cli-1.33.0\t\cardano-cli-golden\test\cardano-cli-1.33.0-cardano-cli-golden.log
 
     - name: Delete socket files in preparation for upload artifacts
       if: ${{ always() }}
