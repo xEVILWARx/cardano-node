@@ -316,13 +316,8 @@ jobs:
     - name: "Run tests"
       run: |
         if [ "${{github.event.inputs.tests}}" != "all" ]; then
-          TMPDIR="${{ runner.temp }}" TMP="${{ runner.temp }}" KEEP_WORKSPACE=1 cabal test --test-show-details=direct \
-            cardano-testnet \
-            cardano-api \
-            cardano-node \
-            cardano-node-chairman \
-            cardano-cli \
-            cardano-submit-api
+          TMPDIR="${{ runner.temp }}" TMP="${{ runner.temp }}" KEEP_WORKSPACE=1 cabal run cardano-cli:test:cardano-cli-golden
+          TMPDIR="${{ runner.temp }}" TMP="${{ runner.temp }}" KEEP_WORKSPACE=1 cabal run cardano-cli:test:cardano-cli-test
         fi
 
     - name: Build & Test
@@ -348,13 +343,13 @@ jobs:
         name: artifacts-${{ matrix.os }}
         path: ./artifacts
 
-    - name: Delete socket files in preparation for upload artifacts
+    - name: cat logs
       if: ${{ always() }}
       run: |
         echo "Cat cardano-cli-test"
-        cat  D:\a\cardano-node\cardano-node\dist-newstyle\build\x86_64-windows\ghc-8.10.7\cardano-cli-1.33.0\t\cardano-cli-test\test\cardano-cli-1.33.0-cardano-cli-test.log
+        cat  D:\\a\\cardano-node\\cardano-node\\dist-newstyle\\build\\x86_64-windows\\ghc-8.10.7\\cardano-cli-1.33.0\\t\\cardano-cli-test\\test\\cardano-cli-1.33.0-cardano-cli-test.log
         echo "And now cardano-cli-golden"
-        cat D:\a\cardano-node\cardano-node\dist-newstyle\build\x86_64-windows\ghc-8.10.7\cardano-cli-1.33.0\t\cardano-cli-golden\test\cardano-cli-1.33.0-cardano-cli-golden.log
+        cat D:\\a\\cardano-node\\cardano-node\\dist-newstyle\\build\\x86_64-windows\\ghc-8.10.7\\cardano-cli-1.33.0\\t\\cardano-cli-golden\\test\\cardano-cli-1.33.0-cardano-cli-golden.log
 
     - name: Delete socket files in preparation for upload artifacts
       if: ${{ always() }}
