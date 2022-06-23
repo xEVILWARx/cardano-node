@@ -810,6 +810,8 @@ data TxBodyErrorAutoBalance =
      | TxBodyErrorMinUTxOMissingPParams MinimumUTxOError
      | TxBodyErrorNonAdaAssetsUnbalanced Value
      | TxBodyErrorScriptWitnessIndexMissingFromExecUnitsMap
+         (Map ScriptWitnessIndex (Either ScriptExecutionError ExecutionUnits))
+         (Map ScriptWitnessIndex ExecutionUnits)
          ScriptWitnessIndex
          (Map ScriptWitnessIndex ExecutionUnits)
 
@@ -871,9 +873,10 @@ instance Error TxBodyErrorAutoBalance where
 
   displayError (TxBodyErrorMinUTxOMissingPParams err) = displayError err
 
-  displayError (TxBodyErrorScriptWitnessIndexMissingFromExecUnitsMap sIndex eUnitsMap) =
+  displayError (TxBodyErrorScriptWitnessIndexMissingFromExecUnitsMap evalExecUnitsRes handleExUnitsErrorsRes sIndex eUnitsMap) =
     "ScriptWitnessIndex (redeemer pointer): " <> show sIndex <> " is missing from the execution \
-    \units (redeemer pointer) map: " <> show eUnitsMap
+    \units (redeemer pointer) map: " <> show eUnitsMap <> "\n" <> " from handleExUnitsErrors: " <>
+    show handleExUnitsErrorsRes <> "\n" <> " from evalExecUnits ledger func: " <> show evalExecUnitsRes
 
 handleExUnitsErrors ::
      ScriptValidity -- ^ Mark script as expected to pass or fail validation
@@ -964,7 +967,7 @@ makeTransactionBodyAutoBalance eraInMode systemstart history pparams
             failures
             exUnitsMap'
 
-    txbodycontent1 <- substituteExecutionUnits exUnitsMap' txbodycontent
+    txbodycontent1 <- substituteExecutionUnits exUnitsMap exUnitsMap' exUnitsMap' txbodycontent
 
     explicitTxFees <- first (const TxBodyErrorByronEraNotSupported) $
                         txFeesExplicitInEra era'
@@ -1011,7 +1014,6 @@ makeTransactionBodyAutoBalance eraInMode systemstart history pparams
         case valueToLovelace v of
           Nothing -> Left $ TxBodyErrorNonAdaAssetsUnbalanced v
           Just _ -> balanceCheck balance
-
     --TODO: we could add the extra fee for the CBOR encoding of the change,
     -- now that we know the magnitude of the change: i.e. 1-8 bytes extra.
 
@@ -1072,20 +1074,23 @@ makeTransactionBodyAutoBalance eraInMode systemstart history pparams
                    (txOutInAnyEra txout)
                    (selectLovelace minUTxO)
 
-substituteExecutionUnits :: Map ScriptWitnessIndex ExecutionUnits
-                         -> TxBodyContent BuildTx era
-                         -> Either TxBodyErrorAutoBalance (TxBodyContent BuildTx era)
-substituteExecutionUnits exUnitsMap =
+substituteExecutionUnits
+  :: Map ScriptWitnessIndex (Either ScriptExecutionError ExecutionUnits)
+  -> Map ScriptWitnessIndex ExecutionUnits
+  -> Map ScriptWitnessIndex ExecutionUnits
+  -> TxBodyContent BuildTx era
+  -> Either TxBodyErrorAutoBalance (TxBodyContent BuildTx era)
+substituteExecutionUnits evalExecUnits check exUnitsMap =
     mapTxScriptWitnesses f
   where
     f :: ScriptWitnessIndex
       -> ScriptWitness witctx era
       -> Either TxBodyErrorAutoBalance (ScriptWitness witctx era)
-    f _   wit@SimpleScriptWitness{} = Right wit
+    f _  wit@SimpleScriptWitness{} = Right wit
     f idx (PlutusScriptWitness langInEra version script datum redeemer _) =
       case Map.lookup idx exUnitsMap of
         Nothing ->
-          Left $ TxBodyErrorScriptWitnessIndexMissingFromExecUnitsMap idx exUnitsMap
+          Left $ TxBodyErrorScriptWitnessIndexMissingFromExecUnitsMap evalExecUnits check idx exUnitsMap
         Just exunits -> Right $ PlutusScriptWitness langInEra version script
                                             datum redeemer exunits
 mapTxScriptWitnesses

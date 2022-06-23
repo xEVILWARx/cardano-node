@@ -11,6 +11,7 @@
 module Cardano.CLI.Shelley.Run.Transaction
   ( ShelleyTxCmdError
   , renderShelleyTxCmdError
+  , readFileTx
   , runTransactionCmd
   ) where
 
@@ -547,7 +548,7 @@ runTxBuild (AnyCardanoEra era) (AnyConsensusModeParams cModeParams) networkId mS
       let cAddr = case anyAddressInEra era changeAddr of
                     Just addr -> addr
                     Nothing -> error $ "runTxBuild: Byron address used: " <> show changeAddr
-
+    --  liftIO $ print txBodyContent
       (BalancedTxBody balancedTxBody _ fee) <-
         firstExceptT ShelleyTxCmdBalanceTxBody
           . hoistEither
