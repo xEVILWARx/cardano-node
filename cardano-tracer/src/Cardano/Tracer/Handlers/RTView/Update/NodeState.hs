@@ -9,7 +9,6 @@ import           Control.Concurrent.STM.TVar (readTVarIO)
 import           Control.Monad (forM_)
 import           Control.Monad.Extra (whenJustM)
 import           Data.Text (pack)
-import qualified Graphics.UI.Threepenny as UI
 import           Graphics.UI.Threepenny.Core (UI, liftIO)
 import           Text.Printf (printf)
 
@@ -23,14 +22,13 @@ import           Cardano.Tracer.Types
 -- | There is 'NodeState' datapoint, it contains different information
 --   about the current state of the node. For example, its sync progress.
 askNSetNodeState
-  :: UI.Window
-  -> ConnectedNodes
+  :: ConnectedNodes
   -> DataPointRequestors
   -> DisplayedElements
   -> UI ()
-askNSetNodeState _window connectedNodes dpRequestors displayed = do
+askNSetNodeState connectedNodes dpRequestors displayed = do
   connected <- liftIO $ readTVarIO connectedNodes
-  forM_ connected $ \nodeId@(NodeId _anId) ->
+  forM_ connected $ \nodeId ->
     whenJustM (liftIO $ askDataPoint dpRequestors nodeId "NodeState") $ \(ns :: NodeState) ->
       case ns of
         NodeAddBlock (AddedToCurrentChain _ _ syncPct) -> setSyncProgress nodeId syncPct

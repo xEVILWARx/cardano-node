@@ -57,12 +57,10 @@ askNSetNodeInfo window dpRequestors newlyConnected displayedElements =
 
   setProtocol p id' = do
     justCleanText id'
-    let byronTag   = UI.span #. "tag is-warning is-rounded is-medium" # set text "Byron"
-        shelleyTag = UI.span #. "tag is-info is-rounded is-medium ml-3" # set text "Shelley"
     case p of
-      "Byron"   -> findAndAdd [byronTag] window id'
-      "Shelley" -> findAndAdd [shelleyTag] window id'
-      _         -> findAndAdd [byronTag, shelleyTag] window id'
+      "Byron"   -> setTextValue id' "Byron"
+      "Shelley" -> setTextValue id' "Shelley"
+      _         -> setTextValue id' "Cardano"
 
   setTime ts id' = do
     justCleanText id'

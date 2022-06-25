@@ -189,7 +189,7 @@ logsSettings loggingConfig anId =
         let pathToSubdir = root </> anId
 
         copyPath <- UI.button #. "button is-info"
-                               #+ [image "rt-view-copy-icon" copySVG]
+                               #+ [image "rt-view-copy-icon-on-button" copySVG]
         on UI.click copyPath . const $
           copyTextToClipboard pathToSubdir
 

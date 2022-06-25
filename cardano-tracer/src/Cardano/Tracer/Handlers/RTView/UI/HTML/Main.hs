@@ -159,18 +159,14 @@ mkMainPage connectedNodes displayedElements acceptedMetrics savedTO
       uiErrorsTimer
       uiNoNodesProgressTimer
 
-  uiPeersTimer <- UI.timer # set UI.interval 3000
+  uiPeersTimer <- UI.timer # set UI.interval 4000
   on UI.tick uiPeersTimer . const $ do
-    updateNodesPeers window peers savedTO
+    askNSetNodeState connectedNodes dpRequestors displayedElements
+    updateNodesPeers window connectedNodes dpRequestors peers
     updateKESInfo window acceptedMetrics nodesEraSettings displayedElements
-
-  uiNodeStateTimer <- UI.timer # set UI.interval 5000
-  on UI.tick uiNodeStateTimer . const $
-    askNSetNodeState window connectedNodes dpRequestors displayedElements
 
   UI.start uiUptimeTimer
   UI.start uiNodesTimer
-  UI.start uiNodeStateTimer
   UI.start uiPeersTimer
   UI.start uiErrorsTimer
   UI.start uiEKGTimer
@@ -180,7 +176,6 @@ mkMainPage connectedNodes displayedElements acceptedMetrics savedTO
     UI.stop uiNodesTimer
     UI.stop uiUptimeTimer
     UI.stop uiPeersTimer
-    UI.stop uiNodeStateTimer
     UI.stop uiEKGTimer
     UI.stop uiErrorsTimer
     UI.stop uiNoNodesProgressTimer
