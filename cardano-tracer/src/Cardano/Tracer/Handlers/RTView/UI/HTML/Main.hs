@@ -4,6 +4,7 @@ module Cardano.Tracer.Handlers.RTView.UI.HTML.Main
   ( mkMainPage
   ) where
 
+import           Control.Concurrent.Extra (Lock)
 import           Control.Concurrent.STM.TVar (readTVarIO)
 import           Control.Monad (void)
 import           Control.Monad.Extra (whenM)
@@ -46,6 +47,7 @@ mkMainPage
   -> SavedTraceObjects
   -> ErasSettings
   -> DataPointRequestors
+  -> Lock
   -> PageReloadedFlag
   -> NonEmpty LoggingParams
   -> Network
@@ -57,7 +59,7 @@ mkMainPage
   -> UI.Window
   -> UI ()
 mkMainPage connectedNodes displayedElements acceptedMetrics savedTO
-           nodesEraSettings dpRequestors reloadFlag loggingConfig networkConfig
+           nodesEraSettings dpRequestors currentDPLock reloadFlag loggingConfig networkConfig
            resourcesHistory chainHistory txHistory nodesErrors eventsQueues window = do
   void $ return window # set UI.title pageTitle
   void $ UI.getHead window #+
@@ -120,11 +122,13 @@ mkMainPage connectedNodes displayedElements acceptedMetrics savedTO
     updateNodesErrors window connectedNodes nodesErrors
 
   whenM (liftIO $ readTVarIO reloadFlag) $ do
+    liftIO $ cleanupDisplayedValues displayedElements
     updateUIAfterReload
       window
       connectedNodes
       displayedElements
       dpRequestors
+      currentDPLock
       loggingConfig
       colors
       datasetIndices
@@ -152,6 +156,7 @@ mkMainPage connectedNodes displayedElements acceptedMetrics savedTO
       savedTO
       nodesEraSettings
       dpRequestors
+      currentDPLock
       loggingConfig
       colors
       datasetIndices
@@ -161,8 +166,8 @@ mkMainPage connectedNodes displayedElements acceptedMetrics savedTO
 
   uiPeersTimer <- UI.timer # set UI.interval 4000
   on UI.tick uiPeersTimer . const $ do
-    askNSetNodeState connectedNodes dpRequestors displayedElements
-    updateNodesPeers window connectedNodes dpRequestors peers
+    askNSetNodeState connectedNodes dpRequestors currentDPLock displayedElements
+    updateNodesPeers window connectedNodes dpRequestors currentDPLock peers
     updateKESInfo window acceptedMetrics nodesEraSettings displayedElements
 
   UI.start uiUptimeTimer

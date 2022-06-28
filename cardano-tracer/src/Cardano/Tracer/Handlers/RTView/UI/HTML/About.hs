@@ -27,7 +27,7 @@ mkAboutInfo = do
     ["-c",       path] -> makeAbsolute path
     ["--config", path] -> makeAbsolute path
     _                  -> return ""
-  
+
   copyPath <- UI.button #. "button is-info"
                         #+ [image "rt-view-copy-icon-on-button" copySVG]
   on UI.click copyPath . const $

@@ -86,7 +86,7 @@ mkNoNodesInfo networkConfig = do
   pleaseWait =
     "If your nodes and <code>cardano-tracer</code> are configured properly, "
     <> "the connection between them will be established automatically, "
-    <> "but it can take some time."
+    <> "but it may take some time."
 
   intro =
     "However, if there is no connection after 1 minute, please check your configuration."

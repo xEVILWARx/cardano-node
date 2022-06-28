@@ -5,6 +5,7 @@ module Cardano.Tracer.Handlers.RTView.Update.Peers
   ( updateNodesPeers
   ) where
 
+import           Control.Concurrent.Extra (Lock)
 import           Control.Concurrent.STM.TVar (readTVarIO)
 import           Control.Monad (forM_, void)
 import           Control.Monad.Extra (whenJustM)
@@ -31,12 +32,13 @@ updateNodesPeers
   :: UI.Window
   -> ConnectedNodes
   -> DataPointRequestors
+  -> Lock
   -> Peers
   -> UI ()
-updateNodesPeers window connectedNodes dpRequestors displayedPeers = do
+updateNodesPeers window connectedNodes dpRequestors currentDPLock displayedPeers = do
   connected <- liftIO $ readTVarIO connectedNodes
   forM_ connected $ \nodeId -> do
-    whenJustM (liftIO $ askDataPoint dpRequestors nodeId "NodePeers") $
+    whenJustM (liftIO $ askDataPoint dpRequestors currentDPLock nodeId "NodePeers") $
       doUpdatePeers window nodeId displayedPeers
 
 doUpdatePeers

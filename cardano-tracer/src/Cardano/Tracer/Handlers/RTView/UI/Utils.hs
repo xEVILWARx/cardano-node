@@ -246,7 +246,7 @@ setDisplayedValue
 setDisplayedValue nodeId displayedElements elId mValue =
   liftIO (getDisplayedValue displayedElements nodeId elId) >>= \case
     Nothing        -> setAndRemember
-    Just displayed -> unless (displayed == mValue) setAndRemember
+    Just displayed -> unless (displayed == mValue) $ setAndRemember
  where
   setAndRemember = do
     setTextValue elId mValue

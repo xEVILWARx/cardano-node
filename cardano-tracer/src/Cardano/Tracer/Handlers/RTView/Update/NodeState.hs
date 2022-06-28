@@ -5,6 +5,7 @@ module Cardano.Tracer.Handlers.RTView.Update.NodeState
   ( askNSetNodeState
   ) where
 
+import           Control.Concurrent.Extra (Lock)
 import           Control.Concurrent.STM.TVar (readTVarIO)
 import           Control.Monad (forM_)
 import           Control.Monad.Extra (whenJustM)
@@ -24,12 +25,13 @@ import           Cardano.Tracer.Types
 askNSetNodeState
   :: ConnectedNodes
   -> DataPointRequestors
+  -> Lock
   -> DisplayedElements
   -> UI ()
-askNSetNodeState connectedNodes dpRequestors displayed = do
+askNSetNodeState connectedNodes dpRequestors currentDPLock displayed = do
   connected <- liftIO $ readTVarIO connectedNodes
   forM_ connected $ \nodeId ->
-    whenJustM (liftIO $ askDataPoint dpRequestors nodeId "NodeState") $ \(ns :: NodeState) ->
+    whenJustM (liftIO $ askDataPoint dpRequestors currentDPLock nodeId "NodeState") $ \(ns :: NodeState) ->
       case ns of
         NodeAddBlock (AddedToCurrentChain _ _ syncPct) -> setSyncProgress nodeId syncPct
         _ -> return ()
