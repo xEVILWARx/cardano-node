@@ -30,7 +30,7 @@ app() {
                 {
                     key: .key
                   , value: {
-                        container_name: \"node-\(.value.i)\"
+                        container_name: \"\(.value.name)\"
                       , pull_policy: \"never\"
                       , image: \"$imageName:$imageTag\"
                       , networks: [\"cardano-node-network\"]
