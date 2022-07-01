@@ -36,17 +36,35 @@ app() {
                       , networks: [\"cardano-node-network\"]
                       , ports: [\"\(.value.port):\(.value.port)\"]
                       , volumes: [
-                          \"DATA_DIR:/var/cardano-node/run\"
+                          \"DATA_DIR-\(.value.name):/var/cardano-node\"
                         ]
                       , environment: [
-                          \"DATA_DIR=/var/cardano-node/run\"
+                            \"DATA_DIR=/var/cardano-node\"
+                          , \"NODE_CONFIG=/var/cardano-node/config.json\"
+                          , \"NODE_TOPOLOGY=/var/cardano-node/topology.json\"
                         ]
                     }
                 }
               )
           )
         , \"networks\": {\"cardano-node-network\": {}}
-        , \"volumes\": {\"DATA_DIR\": {\"external\": true} }
+        , volumes:
+          (
+              .
+            | with_entries (
+                {
+                    key: \"DATA_DIR-\(.value.name)\"
+                  , value: {
+                        external: false
+                      , driver_opts: {
+                            type: \"none\"
+                          , o: \"bind\"
+                          , device: \"$global_rundir_def/current/\(.value.name)\"
+                        }
+                    }
+                }
+              )
+          )
       }" $nodespecs;;
 
     * ) usage_app;; esac
