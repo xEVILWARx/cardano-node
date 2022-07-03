@@ -124,6 +124,7 @@ library
                       , directory
                       , filepath
                       , formatting
+                      , hw-lazy
                       , iproute
                       , network
                       , optparse-applicative-fork

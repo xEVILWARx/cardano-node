@@ -5,6 +5,7 @@
 module Cardano.Api.Key
   ( Key(..)
   , generateSigningKey
+  , generateInsecureSigningKey
   , CastVerificationKeyRole(..)
   , CastSigningKeyRole(..)
   , AsType(AsVerificationKey, AsSigningKey)
@@ -22,6 +23,7 @@ import           Cardano.Api.HasTypeProxy
 import           Cardano.Api.SerialiseRaw
 import           Cardano.Api.SerialiseTextEnvelope
 
+import qualified System.Random as Random
 
 -- | An interface for cryptographic keys used for signatures with a 'SigningKey'
 -- and a 'VerificationKey' key.
@@ -66,6 +68,17 @@ generateSigningKey keytype = do
   where
     seedSize = deterministicSigningKeySeedSize keytype
 
+
+generateInsecureSigningKey
+  :: (Key keyrole, SerialiseAsRawBytes (SigningKey keyrole))
+  => AsType keyrole
+  -> IO (SigningKey keyrole)
+generateInsecureSigningKey keytype = do
+  g <- Random.getStdGen
+  let (bs, _) = Random.genByteString (fromIntegral $ deterministicSigningKeySeedSize keytype) g
+  case deserialiseFromRawBytes (AsSigningKey keytype) bs of
+    Just key -> return key
+    Nothing -> error "generateInsecureSigningKey: Unable to generate insecure key"
 
 instance HasTypeProxy a => HasTypeProxy (VerificationKey a) where
     data AsType (VerificationKey a) = AsVerificationKey (AsType a)
