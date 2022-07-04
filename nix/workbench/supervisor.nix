@@ -74,8 +74,8 @@ let
       finaliseNodeConfig =
         { port, ... }: cfg: recursiveUpdate cfg
           ({
-            AlonzoGenesisFile    = "../genesis.alonzo.json";
-            ShelleyGenesisFile   = "../genesis-shelley.json";
+            AlonzoGenesisFile    = "../genesis/genesis.alonzo.json";
+            ShelleyGenesisFile   = "../genesis/genesis-shelley.json";
             ByronGenesisFile     = "../genesis/byron/genesis.json";
           } // optionalAttrs enableEKG {
             hasEKG               = port + supervisord.portShiftEkg;
@@ -101,8 +101,8 @@ let
       finaliseGeneratorConfig =
         cfg: recursiveUpdate cfg
           ({
-            AlonzoGenesisFile    = "../genesis.alonzo.json";
-            ShelleyGenesisFile   = "../genesis-shelley.json";
+            AlonzoGenesisFile    = "../genesis/genesis.alonzo.json";
+            ShelleyGenesisFile   = "../genesis/genesis-shelley.json";
             ByronGenesisFile     = "../genesis/byron/genesis.json";
           } // optionalAttrs useCabalRun {
             executable           = "tx-generator";
