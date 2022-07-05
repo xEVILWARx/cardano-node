@@ -36,12 +36,13 @@ app() {
                       , networks: [\"cardano-node-network\"]
                       , ports: [\"\(.value.port):\(.value.port)\"]
                       , volumes: [
-                          \"DATA_DIR-\(.value.name):/var/cardano-node\"
+                            \"SHARED:/var/cardano-node\"
+                          , \"LOCAL-\(.value.name):/var/cardano-node/local\"
                         ]
                       , environment: [
-                            \"DATA_DIR=/var/cardano-node\"
-                          , \"NODE_CONFIG=/var/cardano-node/config.json\"
-                          , \"NODE_TOPOLOGY=/var/cardano-node/topology.json\"
+                            \"DATA_DIR=/var/cardano-node/local\"
+                          , \"NODE_CONFIG=/var/cardano-node/local/config.json\"
+                          , \"NODE_TOPOLOGY=/var/cardano-node/local/topology.json\"
                         ]
                     }
                 }
@@ -53,17 +54,28 @@ app() {
               .
             | with_entries (
                 {
-                    key: \"DATA_DIR-\(.value.name)\"
+                    key: \"LOCAL-\(.value.name)\"
                   , value: {
                         external: false
                       , driver_opts: {
                             type: \"none\"
                           , o: \"bind\"
-                          , device: \"$global_rundir_def/current/\(.value.name)\"
+                          , device: \"./run/current/\(.value.name)\"
                         }
                     }
                 }
               )
+            +
+              {SHARED:
+                {
+                    external: false
+                  , driver_opts: {
+                        type: \"none\"
+                      , o: \"bind\"
+                      , device: \"./run/current\"
+                    }
+                }
+              }
           )
       }" $nodespecs;;
 
