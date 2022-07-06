@@ -228,7 +228,7 @@ friendlyProtocolParametersUpdate
     , protocolUpdatePoolPledgeInfluence
     , protocolUpdateMonetaryExpansion
     , protocolUpdateTreasuryCut
-    , protocolUpdateUTxOCostPerWord
+    , protocolUpdateUTxOCostPerByte
     , protocolUpdateCollateralPercent
     , protocolUpdateMaxBlockExUnits
     , protocolUpdateMaxCollateralInputs
@@ -261,7 +261,7 @@ friendlyProtocolParametersUpdate
     , protocolUpdateMonetaryExpansion <&>
         ("monetary expansion" .=) . friendlyRational
     , protocolUpdateTreasuryCut <&> ("treasury expansion" .=) . friendlyRational
-    , protocolUpdateUTxOCostPerWord <&>
+    , protocolUpdateUTxOCostPerByte <&>
         ("UTxO storage cost per unit" .=) . friendlyLovelace
     , protocolUpdateCollateralPercent <&>
         ("collateral inputs share" .=) . (<> "%") . textShow
