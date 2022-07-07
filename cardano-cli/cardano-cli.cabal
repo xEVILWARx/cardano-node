@@ -70,6 +70,8 @@ library
                         Cardano.CLI.Byron.UpdateProposal
                         Cardano.CLI.Byron.Vote
 
+                        Cardano.CLI.IO.Lazy
+
                         Cardano.CLI.Shelley.Commands
                         Cardano.CLI.Shelley.Key
                         Cardano.CLI.Shelley.Orphans
@@ -124,7 +126,6 @@ library
                       , directory
                       , filepath
                       , formatting
-                      , hw-lazy
                       , iproute
                       , network
                       , optparse-applicative-fork
@@ -144,6 +145,7 @@ library
                       , time
                       , transformers
                       , transformers-except
+                      , unliftio-core
                       , utf8-string
                       , vector
                       , yaml

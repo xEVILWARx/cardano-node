@@ -332,12 +332,6 @@ source-repository-package
 
 source-repository-package
   type: git
-  location: https://github.com/haskell-works/hw-lazy
-  tag: 31f0b639a12174e58f15bea0fd45fc3cf7c440d4
-  --sha256: 1j0bl27zbmkjbqpvwcf337cv9shgz4mcmps65c9cwpvmzwyc4s4b
-
-source-repository-package
-  type: git
   location: https://github.com/input-output-hk/aeson
   tag: be4774468e651d1d512edad278cca7276e978034
   --sha256: 12fr5xnr3ax0r5gzwbf4v49yirppgprmvzlfj1ldx4zhcrdf5j7j

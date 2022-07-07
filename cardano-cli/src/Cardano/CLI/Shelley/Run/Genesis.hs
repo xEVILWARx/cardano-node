@@ -107,7 +107,7 @@ import           Text.JSON.Canonical (parseCanonicalJSON, renderCanonicalJSON)
 
 import           Data.ListMap (ListMap(..))
 
-import qualified HaskellWorks.Control.Monad.Lazy as Lazy
+import qualified Cardano.CLI.IO.Lazy as Lazy
 
 {- HLINT ignore "Reduce duplication" -}
 
